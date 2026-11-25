@@ -3,12 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::{LazyLock, Mutex};
 use wasm_bindgen::prelude::*;
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 #[derive(Serialize, Deserialize)]
 pub struct RetToken<'a> {
     /// Word of the token
@@ -77,7 +71,10 @@ pub fn tokenize(text: &str, mode: &str, hmm: Option<bool>) -> Result<Vec<JsValue
 pub fn add_word(word: &str, freq: Option<usize>, tag: Option<String>) -> usize {
     let option_str_ref = tag.as_deref();
 
-    JIEBA.lock().unwrap().add_word(word, freq, option_str_ref)
+    JIEBA
+        .lock()
+        .unwrap()
+        .add_word(word, freq.map(|f| f as u32), option_str_ref) as usize
 }
 
 #[derive(Serialize, Deserialize)]
